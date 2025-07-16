@@ -1,0 +1,112 @@
+package peer
+
+import (
+	"context"
+	"log"
+	"sync"
+
+	"github.com/engr-sjb/diogel/internal/customcrypto"
+	"github.com/engr-sjb/diogel/internal/features/capsule"
+	"github.com/engr-sjb/diogel/internal/features/user"
+	"github.com/engr-sjb/diogel/internal/serialize"
+	"github.com/engr-sjb/diogel/internal/storage"
+	bolt "go.etcd.io/bbolt"
+)
+
+type features struct {
+	*user.User
+	*capsule.Capsule
+}
+
+type PeerConfig struct {
+	// NOTICE IMPORTANT: When you add a field, ALWAYS check if it is it's default value in its contractor func.
+
+	Addr           string
+	UserBucketName string
+	BootstrapPeers []string
+}
+
+type peer struct {
+	*PeerConfig
+	privateKey []byte
+	publicKey  []byte
+	shutdownWG *sync.WaitGroup
+	db         *bolt.DB
+	serialize  serialize.Serializer
+	cCrypto    *customcrypto.CCrypto
+	features   *features
+}
+
+func NewPeer(cfg *PeerConfig) *peer {
+	// NOTICE IMPORTANT: check if all fields on cfg are not their default value before use.
+	switch {
+	case cfg == nil:
+		log.Fatalln("PeerConfig cannot be nil")
+	case cfg.Addr == "":
+		log.Fatalln("Addr field in PeerConfig cannot be empty")
+	case len(cfg.BootstrapPeers) == 0:
+		log.Fatalln("BootstrapPeers field in PeerConfig cannot be empty")
+	case cfg.UserBucketName == "":
+		log.Fatalln("BucketName field in PeerConfig cannot be empty")
+	}
+
+	// NOTICE IMPORTANT: make sure you are initializing the fields on the returned struct that need to be initialized.
+	return &peer{
+		PeerConfig: cfg,
+		shutdownWG: &sync.WaitGroup{},
+		features: &features{
+			// NOTICE IMPORTANT:
+			User:    &user.User{},
+			Capsule: &capsule.Capsule{},
+		},
+	}
+}
+
+func (p *peer) Run() {
+	ctx, cancel := context.WithCancel(
+		context.Background(),
+	)
+	defer cancel()
+
+	p.prepDeps(ctx)
+	// p.serialize.Register(
+	// 	msg.Msgs...,
+	// )
+	//todo: fix this register error as duplicates
+
+	p.prepFeatures(ctx)
+
+}
+
+// prepDeps prepares and initializes the peer's dependencies need by the various components.
+func (p *peer) prepDeps(ctx context.Context) {
+	p.db = storage.NewBBolt(nil)
+	p.serialize = serialize.New()
+	p.cCrypto = customcrypto.NewCCrypto()
+}
+
+// prepFeatures prepares and initializes and configures the peer's features.
+func (p *peer) prepFeatures(ctx context.Context) {
+	userDBStore := user.NewDBStore(
+		&user.DBStoreConfig{
+			DB:                    p.db,
+			UserBucketName:        p.UserBucketName,
+			UserSettingBucketName: "settings",
+		},
+	)
+
+	p.features.User.Service = user.NewService(
+		&user.ServiceConfig{
+			Ctx:     ctx,
+			DBStore: userDBStore,
+			CCrypto: p.cCrypto,
+		},
+	)
+
+	if err := p.features.User.Service.InitIdentity(); err != nil {
+		log.Fatalf("failed to init user identity: %v", err)
+	}
+
+	p.privateKey, p.publicKey = p.features.User.Service.GetKeyPair()
+
+}

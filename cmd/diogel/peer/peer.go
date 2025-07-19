@@ -2,8 +2,14 @@ package peer
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"log/slog"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/features/capsule"
@@ -121,7 +127,8 @@ func (p *peer) prepFeatures(ctx context.Context) {
 		},
 	)
 
-	if err := p.features.User.Service.InitIdentity(); err != nil {
+	pwd := "fake_password" // todo: should come from ui.
+	if err := p.features.User.Service.InitIdentity(pwd); err != nil {
 		log.Fatalf("failed to init user identity: %v", err)
 	}
 

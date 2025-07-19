@@ -80,7 +80,25 @@ func (p *peer) Run() {
 
 // prepDeps prepares and initializes the peer's dependencies need by the various components.
 func (p *peer) prepDeps(ctx context.Context) {
-	p.db = storage.NewBBolt(nil)
+	// home, err := os.UserHomeDir()
+	// if err != nil {
+	// 	log.Fatalf("Error getting user home directory: %v", err)
+	// }
+
+	directory := fmt.Sprintf(
+		"./.diogel/%s",
+		p.Addr,
+	)
+
+	err := os.MkdirAll(
+		directory,
+		0700,
+	)
+	if err != nil {
+		log.Fatal("Error creating .diogel directory")
+	}
+
+	p.db = storage.NewBBolt(directory, p.logger)
 	p.serialize = serialize.New()
 	p.cCrypto = customcrypto.NewCCrypto()
 }

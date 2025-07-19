@@ -10,23 +10,19 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-func NewBBolt(logger *slog.Logger) *bolt.DB {
-	// home, err := os.UserHomeDir()
-	// if err != nil {
-	// 	log.Fatalf("Error getting user home directory: %v", err)
-	// }
+func NewBBolt(dir string, logger *slog.Logger) *bolt.DB {
+	keyPath := fmt.Sprintf(
+		"%s/db",
+		dir,
+	)
 
-	// keyPath := filepath.Join(
-	//home,
-	// 	"./.diogel", // todo: pull name from cfg
-	// )
-
-	keyPath := "./.diogel"
-
-	os.MkdirAll(
+	err := os.MkdirAll(
 		keyPath,
 		0700,
 	)
+	if err != nil {
+		log.Fatal("Error creating directory")
+	}
 
 	boltDB, err := bolt.Open(
 		fmt.Sprintf(

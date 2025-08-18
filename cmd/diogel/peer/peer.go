@@ -13,9 +13,13 @@ import (
 
 	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/features/capsule"
+	"github.com/engr-sjb/diogel/internal/features/ports"
 	"github.com/engr-sjb/diogel/internal/features/user"
+	"github.com/engr-sjb/diogel/internal/protocol"
 	"github.com/engr-sjb/diogel/internal/serialize"
 	"github.com/engr-sjb/diogel/internal/storage"
+	"github.com/engr-sjb/diogel/internal/transport"
+	"github.com/engr-sjb/diogel/internal/transport/tcp"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -39,8 +43,13 @@ type peer struct {
 	shutdownWG *sync.WaitGroup
 	db         *bolt.DB
 	serialize  serialize.Serializer
+	protocol   protocol.Protocol
 	cCrypto    *customcrypto.CCrypto
+	transport  transport.Transport
 	features   *features
+
+	connectedRemotePeersMu sync.RWMutex
+	connectedRemotePeers   map[ports.PublicKey]transport.RemotePeerConn
 }
 
 func NewPeer(cfg *PeerConfig) *peer {
@@ -106,6 +115,7 @@ func (p *peer) prepDeps(ctx context.Context) {
 
 	p.db = storage.NewBBolt(directory, p.logger)
 	p.serialize = serialize.New()
+	p.protocol = protocol.NewProtocol(p.serialize)
 	p.cCrypto = customcrypto.NewCCrypto()
 }
 
@@ -134,4 +144,22 @@ func (p *peer) prepFeatures(ctx context.Context) {
 
 	p.privateKey, p.publicKey = p.features.User.Service.GetKeyPair()
 
-}
+	onMessage := p.makeOnMessageHandler(ctx)
+
+	p.transport = tcp.NewTCPTransport(
+		&tcp.TCPTransportConfig{
+			Ctx:            ctx,
+			ShutdownWG:     p.shutdownWG,
+			PrivateKey:     p.privateKey,
+			PublicKey:      p.publicKey,
+			Addr:           p.Addr,
+			BootstrapPeers: p.BootstrapPeers,
+			Logger:         p.logger,
+			Protocol:       p.protocol,
+			DialTimeout:    time.Second * 2, // todo: reevaluate
+			OnConnect:      p.onConnect,
+			OnDisconnect:   p.onDisconnect,
+			OnMessage:      onMessage,
+		},
+	)
+

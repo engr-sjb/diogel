@@ -26,7 +26,7 @@ type TCPTransportConfig struct {
 	// NOTICE IMPORTANT: When you add a field, ALWAYS check if it is it's default value in its contractor func.
 	Ctx        context.Context
 	ShutdownWG *sync.WaitGroup
-	PrivateKey []byte // todo: not sure about if this should be allowed here. it could get leaked over the wire.... because we are not decrypting anything here???
+	PrivateKey []byte
 	PublicKey  []byte
 	// ServerKeyPath  string
 	// ServerCertPath string
@@ -226,7 +226,6 @@ func (t *tcpTransport) handleRemotePeerConn(remotePeerConn transport.RemotePeerC
 		)
 
 		t.OnConnect(remotePeerConn)
-		// todo: ideal; since the peer is being add to peer orchestrator, cant we read the message from there??? think about it. we can use only one "callback"(onConnect()) which on connect to add the peer and send peer to the onMessage within the peer orchestrator. but we might leak protocol frame reading into the orchestrator.
 
 		for {
 			select {

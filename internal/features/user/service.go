@@ -6,11 +6,14 @@ import (
 	"log/slog"
 
 	"github.com/engr-sjb/diogel/internal/customcrypto"
+	"github.com/engr-sjb/diogel/internal/features"
 	"github.com/engr-sjb/diogel/internal/peererrors"
 )
 
 const (
 	identityKey key = "identity"
+
+	featureUser features.FeatureLocation = "user"
 )
 
 type servicer interface {
@@ -63,27 +66,19 @@ func NewService(cfg *ServiceConfig) *service {
 //   - Loading an existing identity from the database, decrypting the private key using a derived key from the password
 //   - Creating a new identity by generating a key pair, encrypting the private key using a derived key from the password, and storing in database
 func (s *service) InitIdentity(password string) error {
-	// ask for password
-	// pwd, err := promptPassword()
-	// if err != nil {
-	// 	return peererrors.New(
-	// 		peererrors.CodeDefault,
-	// 		err.Error(),
-	// 	)
-	// }
-
 	exists, err := s.existingIdentity(password)
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
+			peererrors.CodeInternalPeerError,
+			"failed to check if identity already exists",
+			err,
+			featureUser,
 		)
 	}
 	if exists {
 		return nil
 	}
 
-	log.Println("creating new identity")
 	// create key
 	derivedKey, usedSalt, err := s.CCrypto.DeriveKey(
 		[]byte(password),
@@ -91,8 +86,10 @@ func (s *service) InitIdentity(password string) error {
 	)
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
+			peererrors.CodeInternalPeerError,
+			"failed to derive key from password",
+			err,
+			featureUser,
 		)
 	}
 
@@ -100,8 +97,10 @@ func (s *service) InitIdentity(password string) error {
 	newPrivKey, newPubKey, err := s.CCrypto.GenerateKeyPair()
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
+			peererrors.CodeInternalPeerError,
+			"failed to generate key pair",
+			err,
+			featureUser,
 		)
 	}
 
@@ -112,8 +111,10 @@ func (s *service) InitIdentity(password string) error {
 	)
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
+			peererrors.CodeInternalPeerError,
+			"failed to encrypt private key",
+			err,
+			featureUser,
 		)
 	}
 
@@ -129,8 +130,10 @@ func (s *service) InitIdentity(password string) error {
 		newIdentity,
 	); err != nil {
 		return peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
+			peererrors.CodeInternalPeerError,
+			"failed to save identity to database",
+			err,
+			featureUser,
 		)
 	}
 
@@ -148,26 +151,19 @@ func (s *service) existingIdentity(pwd string) (bool, error) {
 		retrievedIdentity,
 	)
 	if err != nil {
-		return false, peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
-		)
+		return false, err
 	}
 
 	if !exists {
 		return exists, nil
 	}
 
-	log.Println("loading existing identity")
 	derivedKey, _, err := s.CCrypto.DeriveKey(
 		[]byte(pwd),
 		retrievedIdentity.Salt,
 	)
 	if err != nil {
-		return false, peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
-		)
+		return false, err
 	}
 
 	decPrivateKey, err := s.CCrypto.Cipher.Decrypt(
@@ -176,10 +172,7 @@ func (s *service) existingIdentity(pwd string) (bool, error) {
 		retrievedIdentity.EncPrivKey,
 	)
 	if err != nil {
-		return false, peererrors.New(
-			peererrors.CodeDefault,
-			err.Error(),
-		)
+		return false, err
 	}
 
 	s.privateKey = decPrivateKey

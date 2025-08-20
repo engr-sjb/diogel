@@ -19,14 +19,14 @@ type remotePeerConn struct {
 
 	mu                          sync.RWMutex
 	isBeingRead, isBeingWritten bool
-	lastOp                      time.Time // lastOp holds the time when a last operated occurred.
+	lastOp                      time.Time // lastOp holds the time when a last operation occurred.
 }
 
-// _ is compiler check to prevent silent errors when either RemotePeerConn or remotePeer don't hold same methods
+// _ is compiler check to prevent silent errors when either RemotePeerConn or remotePeer don't hold same methods.
 var _ RemotePeerConn = (*remotePeerConn)(nil)
 
 func NewRemotePeer(publicKey []byte, conn net.Conn, proto protocol.Protocol) *remotePeerConn {
-	publicKeyStr := hex.EncodeToString(publicKey) // todo: maybe; use the unsafe to convert to string for better performance as we wont be using the mutating the public key byte as it will be the underlying data for the string.
+	publicKeyStr := hex.EncodeToString(publicKey) // todo: maybe; use the unsafe package to convert to string for better performance. We wont be mutating the public key byte as it will be the underlying data for the string.
 
 	return &remotePeerConn{
 		conn:         conn,
@@ -49,9 +49,9 @@ func (pr *remotePeerConn) Read(p []byte) (n int, err error) {
 
 func (pr *remotePeerConn) Write(p []byte) (n int, err error) {
 	pr.mu.Lock()
-	pr.isBeingRead = !pr.isBeingRead
+	pr.isBeingWritten = !pr.isBeingWritten
 	n, err = pr.conn.Write(p)
-	pr.isBeingRead = !pr.isBeingRead
+	pr.isBeingWritten = !pr.isBeingWritten
 	pr.lastOp = time.Now()
 	pr.mu.Unlock()
 

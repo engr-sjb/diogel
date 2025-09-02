@@ -1,13 +1,62 @@
-Custom License
-
+Repo-Only Non-Commercial & No-Derivatives License with Anti-Training Clause (RONCND-At) - v1.0
 Copyright (c) 2025 Stephen Jersuit Benyah
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+SUMMARY
+This repository (the "Project") is proprietary. You may only view and contribute to the Codebase only under the terms below. You may not ever copy, republish, redistribute, incorporate, or otherwise reuse the Codebase or  modified versions outside the Project. Use of the Codebase, contribute, or any derivatives works for training, fine-tuning, evaluation, creation of embeddings, or otherwise improving machine learning or AI models or systems is expressly prohibited. The Project Owner retains exclusive rights in the whole universe and beyond to distribute compiled binaries (the "Final Build") and to license those binaries to third parties under separate terms and conditions of their choosing.
 
-1. **Disclose Source**: If you distribute the Software or derivative works, you must disclose the source code of the Software to the recipients.
-2. **License and Copyright Notice**: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-3. **Network Use is Distribution**: Using the Software over a network constitutes distribution, and the same terms apply.
-4. **Same License**: Any derivative works created from the Software must be licensed under the same terms as this license.
-5. **State Changes**: If you modify the Software and distribute it, you must clearly document and state the changes made to the original Software.
-6. **No AI Training**: The Software shall not be used to train, develop, or improve any artificial intelligence or machine learning models, systems, or applications without explicit written permission from the copyright holder.
-7. The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Software or the use or other dealings in the Software.
+DEFINITIONS
+"Project" means the repository that is located at "https://github.com/engr-sjb/diogel" and "https://gitlab.com/engr_sjb/diogel" and any branches and submodules.
+"Codebase" means the source code, build scripts, configuration, tests, documentation, and developer/engineer-orientated artifacts in the project.
+"Final build" means the binary/artifact complied or packaged by the Project Owner and explicitly distributed by the Project Owner.
+"Machine Learning Training" means any process that uses data (including source code, metadata, documentation, or derived representations such as embeddings or feature vectors) to train, fine-tune, validate, evaluate, or otherwise improve machine learning, generative AI, or artificial intelligence models, systems, or services.
+"Contributors" means any person or entity submitting contributions to the Project.
+"Project Owner" means the copyright holder(s) named above.
+
+LICENSE GRANT (VIEW & CONTRIBUTION ONLY, NOTHING LESS)
+1. The Project Owner grants you a limited, non-exclusion, non-sublicensable right which can be modified by the Project Owner at their convenience to :
+      a. View the Codebase within this repository for purpose of review and contribution.
+      b. Submit contributions for consideration under the Contribution License Agreement which can be modified by the Project Owner at their convenience.
+      c. You should own the rights to all and any contributions you want to make this repository before contributing.
+
+2. If the Project Owner accepts your contribution, that contribution becomes part of the Project and is governed by this license and the Contributor license Agreement.
+
+PROHIBITION USES (NO TRAINING / NO REUSE)
+3.Except as explicitly permitted here, you may NOT:
+   a. Copy, redistribute, publish, sublicense, sell, or otherwise make available the Codebase (or portion) outside this Project.
+   b. Incorporate the Codebase, in whole or part, into any other software, service, dataset, or product.
+   c. Use the Codebase, or any. portion thereof, for Machine Learning Training, including but not limited to:
+      i.Pre-training, fine-tuning, or continue training of models.
+      ii. Creating embeddings, vector representation, or feature datasets derived from the Codebase.
+      iii. Producing synthetic data, paraphrases, or derivatives intended for model training or evaluation.
+      iv. Using the Codebase to evaluate or benchmark mL/AI models if such evaluation would retain or reproduce proprietary content outside this Project.
+   d. Reverse-engineer, decompile, or extract the Codebase from any Final Build to circumvent these prohibitions.
+
+FINAL BUILDS / END USER LICENSE
+4. The Project Owner retains exclusive right to produce, distribute, and license Final Builds. End users may use Final Builds only under terms the Projects Owner supplies (e.g., an EULA). The distribution of Final Builds does not grant any rights to the underlying Codebase, nor to use any of the Codebase content for Machine Learning Training.
+
+INTELLECTUAL PROPERTY & CONTRIBUTIONS
+5. Copyright and other IP rights in the Codebase remain with the Project Owner and contributors as described in the contributor License Agreement. Contributions accepted into the Project are licensed to the Project are licensed to the Project Owner under that agreement to ensure consistent rights and the ability to enforce the anti-training restrictions.
+
+TERM & TERMINATION
+6. This license is effective until terminated. The Project Owner may terminate granted right upon breach, including any use law for violations, including but not limited to breaches related to Machine Learning Training.
+
+NO WARRANTY
+8. THE CODEBASE IS PROVIDED "AS IS" WITHOUT WARRANTY. THE PROJECT OWNER IS NOT LIABLE FOR ANY DAMAGES ARISING FROM USE OR INABILITY TO USE THE CODEBASE.
+
+GOVERNING LAW; DISPUTE RESOLUTION; ARBITRATION
+9. This license and any dispute, controversy or claims arising out of aor relating to this License shall be governed by and construed inn accordance with laws of England and Wales.
+
+10. MANDATORY ARBITRATION (EXCLUSION).
+Any dispute, controversy or claims arising out off or relating to this license, or the breach, termination, validity, interpretation or enforceability thereof (a "Dispute"), shall be finally settled bt arbitration administrated by the Singapore International Arbitration Centre (SIAC) in accordance with its Rules then in effect. The seat (legal place) of arbitration shall be Singapore. The arbitration shall be conducted bt a sole arbitrator. The language of the arbitration shall be English. The arbitral tribunal shall apply the substantive law of England and Wales.
+
+11. EMERGENCY RELIEF / INTERIM MEASURES.
+Notwithstanding the foregoing, either party may apply to any court of competent jurisdiction for urgent injunctive, conservatory, or other provisional relief where such relief is necessary to prevent immediate and irreparable harm; such application shall not constitute a wavier of the obligation to arbitrate.
+
+12. WAVIER OF COLLECTIVE ACTIONS.
+The parties agree that arbitration shall proceed only on an individual basis and that there shall be no right or authority for any Dispute to be arbitrated on a class, collective, consolidated, or representative basis.
+
+13. ENFORCEMENT.
+Judgment upon award rendered by the arbitral award shall be final and binding and may be enforced pursuant to applicable law, including under the NewYork Convention where applicable.
+
+SEVERABILITY
+14. If any provision of this LICENSE is held invalid or unenforceable, the remaining provisions shall remain in full force and effect.

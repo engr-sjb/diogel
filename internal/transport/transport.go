@@ -2,6 +2,7 @@ package transport
 
 import (
 	"io"
+	"time"
 
 	"github.com/engr-sjb/diogel/internal/features/ports"
 	"github.com/engr-sjb/diogel/internal/message"
@@ -9,6 +10,7 @@ import (
 
 type RemotePeerConn interface {
 	io.Closer
+	IsStale(threshold time.Duration) bool
 	ports.RemotePeer
 }
 

@@ -6,4 +6,4 @@ Diogel is a decentralized peer-to-peer (P2P) application designed to ensure the 
 
 Diogel solves the problem of digital inheritance without relying on a centralized, trusted third party. This document outlines the complete architecture of Diogel, from its philosophical underpinnings and core cryptographic ceremonies to its advanced features.
 
-> **NB: readme is actively being updated.**
+> **NB: readme is actively being updated. In the meantime you can read through the docs and architectural diagrams** [See docs and architectural diagrams](./docs)

@@ -5,6 +5,7 @@ import (
 	"net"
 	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/engr-sjb/diogel/internal/features/ports"
 	"github.com/engr-sjb/diogel/internal/message"
@@ -27,12 +28,16 @@ var _ RemotePeerConn = (*remotePeerConn)(nil)
 
 func NewRemotePeer(publicKey []byte, conn net.Conn, proto protocol.Protocol) *remotePeerConn {
 	publicKeyStr := hex.EncodeToString(publicKey) // todo: maybe; use the unsafe package to convert to string for better performance. We wont be mutating the public key byte as it will be the underlying data for the string.
+	// NOTICE IMPORTANT: In order not to do an allocation and then copy just to get a string via hex.EncodeToString(publicKey) or string(publicKey) which is a performance overhead I don't want in this section. So we are using unsafe.String to get the pointer of the first element and then its length. I am doing this cause I know for a fact that there is no reason for the public bytes array or slice to be changed.
+	// NOTICE: The RISK 1: If the a byte or bytes of the underlying array or slice is changed, the string will be mutated. Which normal strings in Go don't do; they are immutable.
+	// NOTICE: The RISK 2: If the publicKey byte is a byte slice ([]byte) and we use append() on it for whatever reason, the underlying array (&publicKey[0]) pointers to will not point to the same pointer as before. We will have a dangling pointer. Meaning it will contain garbage data.
+	publicKeyStr := unsafe.String(&publicKey[0], len(publicKey))
 
 	return &remotePeerConn{
 		conn:         conn,
 		publicKeyStr: ports.PublicKey(publicKeyStr),
 		publicKey:    publicKey,
-		protocol:     proto,
+		protocol:     protocol,
 		lastOp:       time.Now(),
 	}
 }

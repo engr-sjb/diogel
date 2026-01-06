@@ -1,3 +1,10 @@
+/*
+	Copyright (c) 2025 Stephen Jersuit Benyah
+	Licensed under the Repo-Only Non-Commercial & No-Derivatives License with Anti-Training Clause (RONCND-AT) v1.0.
+	See LICENSE and CONTRIBUTION_LICENSE_AGREEMENT.md in repository root.
+	Prohibited: copying, reuse, redistribution, or use as training data for machine learning/AI.
+*/
+
 package protocol
 
 import (
@@ -25,7 +32,7 @@ const (
 	v1HeaderPayloadSize uint8   = 4 // This is the size of the payload to be read.
 	v1HeaderSize        uint8   = v1HeaderVersionSize + v1HeaderPayloadSize
 
-	maxLength = 16 << 20 //16KiB	// todo: check this max length for header.
+	maxLength = 16 << 20 //16KiB	// TODO: check this max length for header.
 	// op = 1024 * 16240
 
 )
@@ -40,7 +47,7 @@ type Protocol interface {
 
 type protocol struct {
 	serialize serialize.Serializer
-	// todo: might have to bring cCrypto in here for handshake
+	// TODO: might have to bring cCrypto in here for handshake
 }
 
 var _ Protocol = (*protocol)(nil)
@@ -97,7 +104,7 @@ func (p protocol) DoClientHandshake(remotePeerConn io.ReadWriter, localPublicKey
 }
 
 func sendPublicKey(remotePeerConn io.ReadWriter, localPublicKey []byte) error {
-	// size := 4 //todo: pick a better name for the number of bytes that hold the length size of localPublicKey.
+	// size := 4 //TODO: pick a better name for the number of bytes that hold the length size of localPublicKey.
 
 	localPublicKeySize := len(localPublicKey)
 
@@ -117,7 +124,7 @@ func sendPublicKey(remotePeerConn io.ReadWriter, localPublicKey []byte) error {
 }
 
 func receivePublicKey(remotePeerConn io.ReadWriter) ([]byte, error) {
-	// var size int = 4 //todo: pick a better name for the number of bytes that hold the length size of localPublicKey. and should be a package variable.
+	// var size int = 4 //TODO: pick a better name for the number of bytes that hold the length size of localPublicKey. and should be a package variable.
 
 	payloadBufSize := make([]byte, v1HeaderPayloadSize)
 	_, err := io.ReadFull(
@@ -152,7 +159,7 @@ func receivePublicKey(remotePeerConn io.ReadWriter) ([]byte, error) {
 
 type Payload struct {
 	// we can have anything in here to be sent over the wire
-	Msg message.Msg // todo: might have to create a msg type for msg in payload rather any. not sure but try and see. run test
+	Msg message.Msg // TODO: might have to create a msg type for msg in payload rather any. not sure but try and see. run test
 }
 
 type Frame struct {

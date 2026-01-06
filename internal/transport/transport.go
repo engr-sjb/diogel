@@ -4,6 +4,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/features/ports"
 	"github.com/engr-sjb/diogel/internal/message"
 )
@@ -15,8 +16,8 @@ type RemotePeerConn interface {
 }
 
 type OnConnect func(RemotePeerConn) error
-type OnDisconnect func(publicKeyStr ports.PublicKey) error
-type OnMessage func(remotePeer ports.RemotePeer, msg message.Msg)
+type OnDisconnect func(publicKeyStr customcrypto.PublicKeyStr) error
+type OnMessage func(remotePeer ports.RemotePeer, msg message.Msg) //Todo: might have to move this if i don't want import cycle
 
 type TransportServer interface {
 }

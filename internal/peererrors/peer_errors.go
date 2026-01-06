@@ -24,6 +24,7 @@ type peerError struct {
 }
 
 func New(code Code, message string, err error, featLoc features.FeatureLocation) error {
+	//TODO: I think we need to add a user message and a system or dev message for the engineers.
 	return &peerError{
 		code:    code,
 		message: message,

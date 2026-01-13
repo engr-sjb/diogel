@@ -12,6 +12,7 @@ import (
 	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/message"
 	"github.com/engr-sjb/diogel/internal/protocol"
+	"github.com/google/uuid"
 )
 
 const (
@@ -24,6 +25,7 @@ var (
 )
 
 type remotePeerConn struct {
+	id           uuid.UUID
 	conn         net.Conn
 	publicKeyStr customcrypto.PublicKeyStr
 	publicKey    customcrypto.PublicKeyBytes
@@ -53,6 +55,7 @@ func NewRemotePeer(
 	publicKeyStr := unsafe.String(unsafe.SliceData(publicKey), len(publicKey))
 
 	return &remotePeerConn{
+		id:           uuid.New(),
 		conn:         conn,
 		publicKeyStr: customcrypto.PublicKeyStr(publicKeyStr),
 		publicKey:    publicKey,
@@ -146,6 +149,10 @@ func (pr *remotePeerConn) read(p []byte) (int, error) {
 	}
 
 	return n, err
+}
+
+func (pr *remotePeerConn) ID() uuid.UUID {
+	return pr.id
 }
 
 func (pr *remotePeerConn) PublicKeyStr() customcrypto.PublicKeyStr {

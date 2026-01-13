@@ -12,13 +12,13 @@ import (
 
 	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/message"
+	"github.com/google/uuid"
 )
 
 type RemotePeer interface {
 	io.ReadWriter
-	PublicKeyStr() PublicKey
-	PublicKey() []byte
-	IsBeingRW() (isBeingRead bool, isBeingWritten bool)
-	IsStale(threshold time.Duration) bool
+	PublicKeyStr() customcrypto.PublicKeyStr
+	PublicKey() customcrypto.PublicKeyBytes
+	ID() uuid.UUID
 	Send(msg message.Msg) error
 }

@@ -56,7 +56,7 @@ type peer struct {
 	db         *bolt.DB
 	serialize  serialize.Serializer
 	protocol   protocol.Protocol
-	cCrypto    *customcrypto.CCrypto
+	cCrypto    customcrypto.CCrypto
 	transport  transport.Transport
 	features   *features
 
@@ -246,7 +246,7 @@ func (p *peer) onConnect(newRemotePeerConn transport.RemotePeerConn) error {
 	return nil
 }
 
-func (p *peer) onDisconnect(publicKeyStr ports.PublicKey) error {
+func (p *peer) onDisconnect(publicKeyStr customcrypto.PublicKeyStr) error {
 	defer p.connectedRemotePeersMu.Unlock()
 
 	p.connectedRemotePeersMu.Lock()

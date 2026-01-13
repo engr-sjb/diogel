@@ -30,7 +30,7 @@ type ServiceConfig struct {
 
 	Ctx     context.Context
 	DBStore dbStorer
-	CCrypto *customcrypto.CCrypto
+	CCrypto customcrypto.CCrypto
 	Logger  *slog.Logger
 }
 
@@ -49,7 +49,7 @@ func NewService(cfg *ServiceConfig) *service {
 		log.Fatal("ctx cannot be nil")
 	case cfg.DBStore == nil:
 		log.Fatal("DBStore cannot be nil")
-	case cfg.CCrypto == nil:
+	case cfg.CCrypto.Cipher == nil || cfg.CCrypto.DeriveKey == nil || cfg.CCrypto.GenerateKeyPair == nil:
 		log.Fatal("CCrypto cannot be nil")
 	case cfg.Logger == nil:
 		log.Fatal("Logger cannot be nil")

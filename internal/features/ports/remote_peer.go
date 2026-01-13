@@ -1,13 +1,18 @@
+/*
+	Copyright (c) 2025 Stephen Jersuit Benyah
+	Licensed under the Repo-Only Non-Commercial & No-Derivatives License with Anti-Training Clause (RONCND-AT) v1.0.
+	See LICENSE and CONTRIBUTION_LICENSE_AGREEMENT.md in repository root.
+	Prohibited: copying, reuse, redistribution, or use as training data for machine learning/AI.
+*/
+
 package ports
 
 import (
 	"io"
-	"time"
 
+	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/message"
 )
-
-type PublicKey string // todo: move this to transport i think. no other part needs it here as nno one uses string public key. but wait, capsule will need a slice of pub key.
 
 type RemotePeer interface {
 	io.ReadWriter

@@ -107,6 +107,7 @@ func (s *service) InitIdentity(password string) error {
 	// encrypt new private
 	newEncPrivKey, usedNonce, err := s.CCrypto.Cipher.Encrypt(
 		newPrivKey,
+		nil,
 		derivedKey,
 	)
 	if err != nil {

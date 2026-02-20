@@ -15,14 +15,24 @@ import (
 )
 
 type Cipher interface {
-	Encrypt(data []byte, key []byte) (cipherData, nonce []byte, err error)
+	// Encrypt encrypts data using the provided masterKey.masterKey must be 16,
+	// 24, or 32 bytes for AES-128, AES-192, or AES-256. If nonce is nil or
+	// empty, a cryptographically secure random nonce is generated.Returns the
+	// encrypted cipherData, the nonce used, and any error encountered.
+	//
+	// NOTICE IMPORTANT: Never reuse the same nonce with the same key - this breaks GCM security.
+	Encrypt(masterKey, nonce, data []byte) (cipherData, usedNonce []byte, err error)
 	Decrypt(masterKey []byte, nonce []byte, encData []byte) ([]byte, error)
 }
 
-type cCipher struct{}
-
-func (c cCipher) Encrypt(data []byte, masterKey []byte) (
-	cipherData, nonce []byte, err error,
+// Encrypt encrypts data using AES-256-GCM with the provided masterKey.
+// masterKey must be 16, 24, or 32 bytes for AES-128, AES-192, or AES-256.
+// If nonce is nil or empty, a cryptographically secure random nonce is generated.
+// Returns the encrypted cipherData, the nonce used, and any error encountered.
+//
+// NOTICE IMPORTANT: Never reuse the same nonce with the same key - this breaks GCM security.
+func (c cCipher) Encrypt(masterKey, nonce, data []byte) (
+	cipherData, usedNonce []byte, err error,
 ) {
 	// Encrypt data with master key
 	block, err := aes.NewCipher(masterKey)
@@ -36,9 +46,11 @@ func (c cCipher) Encrypt(data []byte, masterKey []byte) (
 	}
 
 	//gen nonce
-	nonce = make([]byte, gcm.NonceSize())
-	if _, err := rand.Read(nonce); err != nil {
-		return cipherData, nonce, err
+	if len(nonce) == 0 {
+		nonce = make([]byte, gcm.NonceSize())
+		if _, err := rand.Read(nonce); err != nil {
+			return cipherData, nonce, err
+		}
 	}
 
 	cipherData = gcm.Seal(nil, nonce, data, nil)

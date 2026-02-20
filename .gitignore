@@ -10,3 +10,8 @@ codebook.toml
 .git_old_one
 .DS_Store
 .amazonqignore
+todo.md
+test/face_secret_doc.txt
+test/op.txt
+test/second_fake_doc.txt
+licence_op

@@ -17,6 +17,7 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash v1.1.0
 	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/klauspost/compress v1.18.2
 	github.com/klauspost/reedsolomon v1.12.6

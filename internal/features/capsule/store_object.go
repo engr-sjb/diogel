@@ -34,6 +34,7 @@ var (
 )
 
 type fileStorer interface {
+	ports.FileStorer
 
 	// Open takes st (storageType eg. google cloud, local disk, etc. which are
 	// available as exported variables from this file), paths of the files to be
@@ -196,4 +197,14 @@ func CASPathTransformFunc(hash [32]byte) pathKey {
 		dirPath:  filepath.Join(paths...),
 		filename: hashStr[sliceLen*blockSize:], // remaining chars as filename
 	}
+}
+
+func (s *fileStore) Create(pathName string) (ports.File, error) {
+	fullPath := filepath.Join(s.RootDir, pathName)
+	return os.Create(fullPath)
+}
+
+func (s *fileStore) MkdirAll(dirPath string) error {
+	fullPath := filepath.Join(s.RootDir, dirPath)
+	return os.MkdirAll(fullPath, 0700)
 }

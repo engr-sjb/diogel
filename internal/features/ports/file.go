@@ -15,6 +15,12 @@ import (
 	"time"
 )
 
+type FileStorer interface {
+	// For writing extracted files during recovery
+	Create(path string) (File, error)
+	MkdirAll(path string) error
+}
+
 type File interface {
 	io.ReadWriteCloser
 	io.Seeker

@@ -12,6 +12,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"time"
 
 	"io"
 
@@ -62,6 +63,14 @@ func NewProtocol(s serialize.Serializer) *protocol {
 func (p protocol) DoServerHandshake(remotePeerConn io.ReadWriter, localPublicKey []byte) (remotePublicKey []byte, err error) {
 	// TODO: I can pass in a remote key slice to fill with their remote key rather than returning a slice. Not sure yet.
 
+	//  Set deadline for handshake
+	if conn, ok := remotePeerConn.(interface {
+		SetReadDeadline(time.Time) error
+	}); ok {
+		conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+		defer conn.SetReadDeadline(time.Time{}) // Clear deadline after handshake
+	}
+
 	//------ Receive their public key.
 	remotePublicKey, err = receivePublicKey(remotePeerConn)
 	if err != nil {
@@ -79,6 +88,14 @@ func (p protocol) DoServerHandshake(remotePeerConn io.ReadWriter, localPublicKey
 
 func (p protocol) DoClientHandshake(remotePeerConn io.ReadWriter, localPublicKey []byte) (remotePublicKey []byte, err error) {
 	// TODO: I can pass in a remote key slice to fill with their remote key rather than returning a slice. Not sure yet.
+
+	// Set deadline for handshake
+	if conn, ok := remotePeerConn.(interface {
+		SetReadDeadline(time.Time) error
+	}); ok {
+		conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+		defer conn.SetReadDeadline(time.Time{}) // Clear deadline after handshake
+	}
 
 	/*
 		- send public key; why? for them to use to encrypt further handshake msgs they send to me.

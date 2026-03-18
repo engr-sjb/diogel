@@ -20,5 +20,6 @@ type RemotePeer interface {
 	PublicKeyStr() customcrypto.PublicKeyStr
 	PublicKey() customcrypto.PublicKeyBytes
 	ID() uuid.UUID
-	Send(msg message.Msg) error
+	Send(msg message.Msg, data []byte) (int, error)
+	Receive(msg message.Msg, data []byte) (int, error)
 }

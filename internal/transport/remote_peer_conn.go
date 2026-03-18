@@ -1,3 +1,10 @@
+/*
+	Copyright (c) 2025 Stephen Jersuit Benyah
+	Licensed under the Repo-Only Non-Commercial & No-Derivatives License with Anti-Training Clause (RONCND-AT) v1.0.
+	See LICENSE and CONTRIBUTION_LICENSE_AGREEMENT.md in repository root.
+	Prohibited: copying, reuse, redistribution, or use as training data for machine learning/AI.
+*/
+
 package transport
 
 import (
@@ -16,7 +23,8 @@ import (
 )
 
 const (
-	chunkSize = 256 * 1024
+	chunkSize  = 256 * 1024
+	chunkSize0 = 1 << 18
 )
 
 var (
@@ -76,13 +84,7 @@ func (pr *remotePeerConn) Read(p []byte) (n int, err error) {
 	return pr.read(p)
 }
 
-func (pr *remotePeerConn) Send(msg message.Msg) error {
-	pr.writeMu.Lock()
-	defer pr.writeMu.Unlock()
-	return pr.send(msg)
-}
-
-func (pr *remotePeerConn) SendChunk(msg message.Msg, data []byte) (int, error) {
+func (pr *remotePeerConn) Send(msg message.Msg, data []byte) (int, error) {
 	pr.writeMu.Lock()
 	defer pr.writeMu.Unlock()
 
@@ -93,37 +95,73 @@ func (pr *remotePeerConn) SendChunk(msg message.Msg, data []byte) (int, error) {
 	if err := pr.send(msg); err != nil {
 		return 0, err
 	}
+	// offset:= 0
+	// for offset < len(data) {
+	// 	n, err := pr.write(data[offset:])
+	// 	if err != nil {
+	// 		return 0, err
+	// 	}
+	// 	offset += n
+	// }
+
+	if data == nil {
+		return 0, nil
+	}
+	if len(data) == 0 {
+		return 0, errors.New(
+			"data is empty. if there is no data, pass nil explicitly, else its is a bug",
+		)
+	}
 
 	return pr.write(data)
 }
 
-func (pr *remotePeerConn) ReceiveChunk(buf []byte) (message.Msg, int, error) {
+func (pr *remotePeerConn) Receive(msg message.Msg, data []byte) (int, error) {
 	pr.readMu.Lock()
 	defer pr.readMu.Unlock()
 
 	if err := pr.protocol.ReadFrame(pr, &pr.readFrame); err != nil {
-		return nil, 0, err
+		return 0, err
 	}
 
-	var size uint64 = 0
+	msg = pr.readFrame.Payload.Msg
 
-	switch m := pr.readFrame.Payload.Msg.(type) {
+	if data == nil {
+		return 0, nil
+	}
+
+	var size int = 0
+
+	switch newMsg := pr.readFrame.Payload.Msg.(type) {
+	//Todo: Rethink this design as we have to do a type assertion over here just know size to read from the connection and also have assert again in the caller who is calling the receive just to be able too use the actual message type.
 	case message.CapsuleStreamChuck:
-		size = m.Size
+		size = int(newMsg.Size)
+
+	case message.CapsuleShardStream:
+		size = int(newMsg.Size)
 
 	default:
-		return nil, 0, ErrUnexpectedMessageType
+		return 0, ErrUnexpectedMessageType
 	}
 
-	if size > chunkSize || int(size) > len(buf) {
-		return nil, 0, ErrChunkSizeExceeded
+	if size > chunkSize || size <= len(data) {
+		//Todo: I think we need to have a cap size or rethink creating the buf outside and sending it in.
+		return 0, ErrChunkSizeExceeded
 	}
 
-	n, err := io.ReadFull(pr.conn, buf[:size])
-	if err == nil {
-		pr.lastReadOp.Store(time.Now().UnixNano())
+	n, err := io.ReadFull(pr.conn, data[:size])
+	if err != nil {
+		return 0, err
 	}
-	return pr.readFrame.Payload.Msg, n, err
+	if n != size {
+		return 0, errors.New("read more data than buffer capacity")
+	}
+
+	pr.lastReadOp.Store(time.Now().UnixNano())
+
+	//Todo: Check err or so. not sure if i should return the read full error or handle it here or turn it.
+
+	return n, err
 }
 
 func (pr *remotePeerConn) write(p []byte) (int, error) {

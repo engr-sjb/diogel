@@ -215,6 +215,7 @@ func (t *tcpTransport) handleRemotePeerConn(remotePeerConn transport.RemotePeerC
 	go func(remotePeerConn transport.RemotePeerConn) {
 		defer t.wg.Done()
 		defer remotePeerConn.Close()
+		defer t.OnDisconnect(remotePeerConn.PublicKeyStr()) // ADD THIS LINE
 
 		// remotePeerConn.
 
@@ -248,8 +249,6 @@ func (t *tcpTransport) handleRemotePeerConn(remotePeerConn transport.RemotePeerC
 							remotePeerConn.PublicKey(),
 							err,
 						)
-
-						t.OnDisconnect(remotePeerConn.PublicKeyStr())
 						return
 					}
 

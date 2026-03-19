@@ -1,9 +1,11 @@
 package database
 
 const (
-	BucketCapsules         = "capsules"
-	BucketCapsulesActive   = "capsules:active"
-	BucketCapsulesRecovery = "capsules:recovery"
+	BucketUser = "user"
+
+	BucketCapsules             = "capsules"
+	BucketCapsulesActiveShards = "capsules:active_shards"
+	BucketCapsulesRecovery     = "capsules:recovery"
 
 	BucketGuardians  = "guardians"
 	BucketKeyShares  = "keyshares"
@@ -11,13 +13,16 @@ const (
 	BucketPeers      = "peers"
 )
 
-///todo: add a struct for every bucket group type or feature to limit the access of them in different feature slices.
+//todo: add a struct for every bucket group type or feature to limit the access of them in different feature slices.
+
+// Todo: i might have to let let multiple coll have one bucket ame. not sure. or have sub buckets, not sure.
 
 type Collection uint16
 
 const (
-	CollCapsules Collection = iota
-	CollCapsulesActive
+	CollUser Collection = iota
+	CollCapsules
+	CollCapsulesActiveShards
 	CollCapsulesRecovery
 	CollGuardians
 	CollKeyShares
@@ -27,10 +32,13 @@ const (
 
 func (c Collection) BucketName() string {
 	switch c {
+	case CollUser:
+		return BucketUser
+
 	case CollCapsules:
 		return BucketCapsules
-	case CollCapsulesActive:
-		return BucketCapsulesActive
+	case CollCapsulesActiveShards:
+		return BucketCapsulesActiveShards
 	case CollCapsulesRecovery:
 		return BucketCapsulesRecovery
 

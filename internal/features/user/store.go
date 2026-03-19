@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/engr-sjb/diogel/internal/shared/database"
 	bolt "go.etcd.io/bbolt"
 	boltErr "go.etcd.io/bbolt/errors"
 )
@@ -25,7 +26,6 @@ type DBStoreConfig struct {
 	// NOTICE IMPORTANT: When you add a field, ALWAYS check if it is it's default value in its contractor func.
 
 	DB                    *bolt.DB
-	UserBucketName        string
 	UserSettingBucketName string
 }
 
@@ -40,8 +40,6 @@ func NewDBStore(cfg *DBStoreConfig) *dbStore {
 		log.Fatalln("store config is nil")
 	case cfg.DB == nil:
 		log.Fatalln("invalid store config: DB is nil")
-	case cfg.UserBucketName == "":
-		log.Fatalln("invalid store config: UserBucketName is empty")
 	case cfg.UserSettingBucketName == "":
 		log.Fatalln("invalid store config: UserSettingBucketName is empty")
 	}
@@ -58,7 +56,7 @@ func (s *dbStore) find(key key, value any) (exists bool, err error) {
 	err = s.DB.View(
 		func(tx *bolt.Tx) error {
 			b := tx.Bucket(
-				[]byte(s.UserBucketName),
+				[]byte(database.CollUser.BucketName()),
 			)
 			if b == nil {
 				return boltErr.ErrBucketNotFound
@@ -98,7 +96,7 @@ func (s *dbStore) save(key key, v any) error {
 	err = s.DB.Update(
 		func(tx *bolt.Tx) error {
 			b, err := tx.CreateBucketIfNotExists(
-				[]byte(s.UserBucketName),
+				[]byte(database.CollUser.BucketName()),
 			)
 			if err != nil {
 				return err
@@ -118,7 +116,7 @@ func (s *dbStore) delete(key key) error {
 	err := s.DB.Update(
 		func(tx *bolt.Tx) error {
 			b := tx.Bucket(
-				[]byte(s.UserBucketName),
+				[]byte(database.CollUser.BucketName()),
 			)
 
 			return b.Delete([]byte(key))

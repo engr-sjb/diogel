@@ -63,7 +63,7 @@ type fileStore struct {
 	// todo: if its system disk, we don't need to inject nothing, but if its some external cloud or such storage, then we will allow to inject that here.
 }
 
-func NewFileStore(cfg *FileStoreConfig) *fileStore {
+func NewObjectStore(cfg *FileStoreConfig) *fileStore {
 	// NOTICE IMPORTANT: check if all fields on cfg are not their default value before use.
 
 	return &fileStore{

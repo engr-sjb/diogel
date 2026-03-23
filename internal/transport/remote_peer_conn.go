@@ -32,6 +32,22 @@ var (
 	ErrUnexpectedMessageType = errors.New("unexpected message type")
 )
 
+type RemotePeer interface {
+	io.ReadWriter
+	PublicKeyStr() customcrypto.PublicKeyStr
+	PublicKey() customcrypto.PublicKeyBytes
+	ID() uuid.UUID
+	Send(msg message.Msg, data []byte) (int, error)
+	Receive(msg message.Msg, data []byte) (int, error)
+}
+
+type RemotePeerConn interface {
+	io.Closer
+	IsStale(threshold time.Duration) bool
+	RemotePeer
+}
+
+// remotePeerConn represents a connection to a remote peer.
 type remotePeerConn struct {
 	id           uuid.UUID
 	conn         net.Conn
@@ -137,7 +153,7 @@ func (pr *remotePeerConn) Receive(msg message.Msg, data []byte) (int, error) {
 	case message.CapsuleStreamChuck:
 		size = int(newMsg.Size)
 
-	case message.CapsuleShardStream:
+	case message.CapsuleIncomingShardStream:
 		size = int(newMsg.Size)
 
 	default:

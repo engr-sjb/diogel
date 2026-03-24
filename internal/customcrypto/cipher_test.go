@@ -39,8 +39,9 @@ func TestCustomCipher_Encrypt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := cCipher{}
 			gotCipherData, gotNonce, err := c.Encrypt(
-				[]byte(tt.args.data),
 				[]byte(tt.args.masterKey),
+				nil,
+				[]byte(tt.args.data),
 			)
 			assert.Nil(t, err)
 

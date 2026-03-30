@@ -37,6 +37,7 @@ type RemotePeer interface {
 	PublicKeyStr() customcrypto.PublicKeyStr
 	PublicKey() customcrypto.PublicKeyBytes
 	ID() uuid.UUID
+	Addr() net.Addr
 	Send(msg message.Msg, data []byte) (int, error)
 	Receive(msg message.Msg, data []byte) (int, error)
 }
@@ -50,6 +51,7 @@ type RemotePeerConn interface {
 // remotePeerConn represents a connection to a remote peer.
 type remotePeerConn struct {
 	id           uuid.UUID
+	addr         net.Addr
 	conn         net.Conn
 	publicKeyStr customcrypto.PublicKeyStr
 	publicKey    customcrypto.PublicKeyBytes
@@ -72,6 +74,7 @@ var _ RemotePeerConn = (*remotePeerConn)(nil)
 func NewRemotePeer(
 	publicKey customcrypto.PublicKeyBytes,
 	conn net.Conn,
+	addr net.Addr,
 	protocol protocol.Protocol) *remotePeerConn {
 	// NOTICE IMPORTANT: In order not to do an allocation and then copy just to get a string via hex.EncodeToString(publicKey) or string(publicKey) which is a performance overhead I don't want in this section. So we are using unsafe.String to get the pointer of the first element and then its length. I am doing this cause I know for a fact that there is no reason for the public bytes array or slice to be changed.
 	// NOTICE: The RISK 1: If the a byte or bytes of the underlying array or slice is changed, the string will be mutated. Which normal strings in Go don't do; they are immutable.
@@ -80,6 +83,7 @@ func NewRemotePeer(
 
 	return &remotePeerConn{
 		id:           uuid.New(),
+		addr:         addr,
 		conn:         conn,
 		publicKeyStr: customcrypto.PublicKeyStr(publicKeyStr),
 		publicKey:    publicKey,
@@ -207,6 +211,10 @@ func (pr *remotePeerConn) read(p []byte) (int, error) {
 
 func (pr *remotePeerConn) ID() uuid.UUID {
 	return pr.id
+}
+
+func (pr *remotePeerConn) Addr() net.Addr {
+	return pr.addr
 }
 
 func (pr *remotePeerConn) PublicKeyStr() customcrypto.PublicKeyStr {

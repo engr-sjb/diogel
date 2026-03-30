@@ -193,7 +193,7 @@ func (t *tcpTransport) acceptLoop() {
 					err,
 				)
 				conn.Close()
-				t.OnDisconnect(peer.PublicKeyStr())
+				t.OnDisconnect(peer.ID())
 
 				continue
 			}
@@ -215,7 +215,7 @@ func (t *tcpTransport) handleRemotePeerConn(remotePeerConn transport.RemotePeerC
 	go func(remotePeerConn transport.RemotePeerConn) {
 		defer t.wg.Done()
 		defer remotePeerConn.Close()
-		defer t.OnDisconnect(remotePeerConn.PublicKeyStr()) // ADD THIS LINE
+		defer t.OnDisconnect(remotePeerConn.ID()) // ADD THIS LINE
 
 		// remotePeerConn.
 
@@ -409,7 +409,7 @@ func (t *tcpTransport) newRemotePeer(publicKey []byte, conn net.Conn) (transport
 		return nil, errors.New("conn can't be nil")
 	}
 
-	rp := transport.NewRemotePeer(publicKey, conn, t.Protocol)
+	rp := transport.NewRemotePeer(publicKey, conn, t.ln.Addr(), t.Protocol)
 
 	return rp, nil
 }

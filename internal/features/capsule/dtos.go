@@ -10,7 +10,6 @@ package capsule
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -64,7 +63,6 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 	}
 
 	hasLetter := cc.Letter != nil
-	log.Println(hasLetter, "<<< hasLetter")
 	hasFilePaths := len(cc.FilePaths) > 0 && cc.FilePaths[0] != ""
 
 	if !hasLetter && !hasFilePaths {
@@ -106,8 +104,6 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 		if err != nil {
 			return err
 		}
-
-		log.Println(letterFileInfo.Name() == "", letterFileInfo.Size() > 0, "<<<< check has")
 
 		if letterFileInfo.Name() == "" || letterFileInfo.Size() <= 0 {
 			return peererrors.New(

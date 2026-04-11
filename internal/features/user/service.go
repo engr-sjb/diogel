@@ -8,6 +8,7 @@ import (
 	"github.com/engr-sjb/diogel/internal/customcrypto"
 	"github.com/engr-sjb/diogel/internal/features"
 	"github.com/engr-sjb/diogel/internal/peererrors"
+	"github.com/google/uuid"
 )
 
 const (
@@ -20,9 +21,9 @@ type servicer interface {
 	// InitIdentity initializes the Servicer's cryptographic identity.
 	// Returns an error if any cryptographic operations or database access fails.
 	InitIdentity(password string) error
-	// GetKeyPair returns the user's private and public key pair.
+	// GetIdentity returns the user's private and public key pair.
 	// Returns nil for if they are not set.
-	GetKeyPair() (privateKey []byte, PublicKey []byte)
+	GetIdentity() (peerID uuid.UUID, privateKey []byte, PublicKey []byte)
 }
 
 type ServiceConfig struct {
@@ -36,6 +37,7 @@ type ServiceConfig struct {
 
 type service struct {
 	*ServiceConfig
+	peerID     uuid.UUID
 	privateKey []byte
 	publicKey  []byte
 }
@@ -93,6 +95,9 @@ func (s *service) InitIdentity(password string) error {
 		)
 	}
 
+	//create PeerID
+	newPeerID := uuid.New()
+
 	//key pair
 	newPrivKey, newPubKey, err := s.CCrypto.GenerateKeyPair()
 	if err != nil {
@@ -121,6 +126,7 @@ func (s *service) InitIdentity(password string) error {
 
 	// save new identity
 	newIdentity := &identity{
+		PeerID:     newPeerID,
 		EncPrivKey: newEncPrivKey,
 		PublicKey:  newPubKey,
 		Salt:       usedSalt,
@@ -139,6 +145,7 @@ func (s *service) InitIdentity(password string) error {
 	}
 
 	// set keys
+	s.peerID = newPeerID
 	s.privateKey = newPrivKey
 	s.publicKey = newPubKey
 
@@ -176,17 +183,18 @@ func (s *service) existingIdentity(pwd string) (bool, error) {
 		return false, err
 	}
 
+	s.peerID = retrievedIdentity.PeerID
 	s.privateKey = decPrivateKey
 	s.publicKey = retrievedIdentity.PublicKey
 
 	return exists, nil
 }
 
-// GetKeyPair returns the user's private and public key pair that was previously initialized
+// GetIdentity returns the user's peerID, private and public key pair that was previously initialized
 // via InitIdentity(). The private key is the decrypted version that was either loaded from
 // storage or newly generated. The public key is the corresponding public key for the private key.
 //
-// IMPORTANT NOTE: RETURNS NIL FOR BOTH KEYS IF IDENTITY HAS NOT BEEN INITIALIZED. SO CALL InitIdentity() METHOD BEFORE CALLING GetKeyPair().
-func (s *service) GetKeyPair() (privKey []byte, PubKey []byte) {
-	return s.privateKey, s.publicKey
+// IMPORTANT NOTE: RETURNS NIL FOR ALL IF IDENTITY HAS NOT BEEN INITIALIZED. SO CALL InitIdentity() METHOD BEFORE CALLING GetIdentity().
+func (s *service) GetIdentity() (peerID uuid.UUID, privKey []byte, PubKey []byte) {
+	return s.peerID, s.privateKey, s.publicKey
 }

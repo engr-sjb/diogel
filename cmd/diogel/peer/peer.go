@@ -31,6 +31,7 @@ import (
 	"github.com/engr-sjb/diogel/internal/storage"
 	"github.com/engr-sjb/diogel/internal/transport"
 	"github.com/engr-sjb/diogel/internal/transport/tcp"
+	"github.com/google/uuid"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -50,6 +51,7 @@ type PeerConfig struct {
 
 type peer struct {
 	*PeerConfig
+	peerID     uuid.UUID
 	privateKey []byte
 	publicKey  []byte
 	shutdownWG *sync.WaitGroup
@@ -158,7 +160,7 @@ func (p *peer) prepFeatures(ctx context.Context) {
 		log.Fatalf("failed to init user identity: %v", err)
 	}
 
-	p.privateKey, p.publicKey = p.features.User.Service.GetKeyPair()
+	p.peerID, p.privateKey, p.publicKey = p.features.User.Service.GetIdentity()
 
 	onMessage := p.makeOnMessageHandler(ctx)
 

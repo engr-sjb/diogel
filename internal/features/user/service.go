@@ -71,7 +71,8 @@ func (s *service) InitIdentity(password string) error {
 	exists, err := s.existingIdentity(password)
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeInternalPeer,
+			peererrors.CodeTodo,
 			"failed to check if identity already exists",
 			err,
 			featureUser,
@@ -88,7 +89,8 @@ func (s *service) InitIdentity(password string) error {
 	)
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeInternalPeer,
+			peererrors.CodeTodo,
 			"failed to derive key from password",
 			err,
 			featureUser,
@@ -102,7 +104,8 @@ func (s *service) InitIdentity(password string) error {
 	newPrivKey, newPubKey, err := s.CCrypto.GenerateKeyPair()
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeInternalPeer,
+			peererrors.CodeTodo,
 			"failed to generate key pair",
 			err,
 			featureUser,
@@ -117,7 +120,8 @@ func (s *service) InitIdentity(password string) error {
 	)
 	if err != nil {
 		return peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeInternalPeer,
+			peererrors.CodeTodo,
 			"failed to encrypt private key",
 			err,
 			featureUser,
@@ -137,7 +141,8 @@ func (s *service) InitIdentity(password string) error {
 		newIdentity,
 	); err != nil {
 		return peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeInternalPeer,
+			peererrors.CodeTodo,
 			"failed to save identity to database",
 			err,
 			featureUser,

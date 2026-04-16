@@ -37,7 +37,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 	// todo: we need to validate the whole struct and return the all the errors together
 	if len(cc.RemotePeerGuardians) < int(d.MinNumOfGuardians) {
 		return peererrors.New(
-			peererrors.CodeLocalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			fmt.Sprintf(
 				"guardians must be at least %d",
 				d.MinNumOfGuardians,
@@ -48,7 +49,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 	}
 	if len(cc.RemotePeerGuardians) > int(d.MaxNumOfGuardians) {
 		return peererrors.New(
-			peererrors.CodeLocalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			fmt.Sprintf(
 				"guardians must be at most %d",
 				d.MaxNumOfGuardians,
@@ -67,7 +69,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 
 	if !hasLetter && !hasFilePaths {
 		return peererrors.New(
-			peererrors.CodeLocalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			"at least, a letter or a file path(s) must be provided",
 			ErrInvalidCreateCapsuleData,
 			featureCapsule,
@@ -79,7 +82,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 		for i := range cc.FilePaths {
 			if _, err := os.Stat(cc.FilePaths[i]); os.IsNotExist(err) {
 				return peererrors.New(
-					peererrors.CodeLocalPeerError,
+					peererrors.ScopeLocalPeer,
+					peererrors.ErrBadRequest,
 					fmt.Sprintf("file does not exist: %s", cc.FilePaths[i]),
 					err,
 					featureCapsule,
@@ -107,7 +111,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 
 		if letterFileInfo.Name() == "" || letterFileInfo.Size() <= 0 {
 			return peererrors.New(
-				peererrors.CodeLocalPeerError,
+				peererrors.ScopeLocalPeer,
+				peererrors.ErrBadRequest,
 				"letter must be a valid letter that has a name and content",
 				nil,
 				featureCapsule,
@@ -125,7 +130,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 	// Validate threshold bounds
 	if cc.CapsuleMasterKeyRecoveryThreshold < 2 {
 		return peererrors.New(
-			peererrors.CodeLocalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			"recovery threshold must be at least 2",
 			ErrInvalidCapsuleMasterKeyRecoveryThreshold,
 			featureCapsule,
@@ -134,7 +140,8 @@ func (cc *CreateCapsuleDTO) validate(d Defaults) error {
 
 	if cc.CapsuleMasterKeyRecoveryThreshold > len(cc.RemotePeerGuardians) {
 		return peererrors.New(
-			peererrors.CodeLocalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			"recovery threshold cannot exceed number of guardians",
 			ErrInvalidCapsuleMasterKeyRecoveryThreshold,
 			featureCapsule,
@@ -150,7 +157,8 @@ func (cc *CreateCapsuleDTO) GetNumOfFiles() (int, error) {
 	letterFileInfo, err := cc.Letter.Stat()
 	if err != nil {
 		return 0, peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			"failed to get file info in capsule dto",
 			err,
 			featureCapsule,
@@ -170,7 +178,8 @@ func (cc *CreateCapsuleDTO) GetTotalSize() (int64, error) {
 	letterFileInfo, err := cc.Letter.Stat()
 	if err != nil {
 		return 0, peererrors.New(
-			peererrors.CodeInternalPeerError,
+			peererrors.ScopeLocalPeer,
+			peererrors.ErrBadRequest,
 			"failed to get file info in capsule dto",
 			err,
 			featureCapsule,
@@ -185,7 +194,8 @@ func (cc *CreateCapsuleDTO) GetTotalSize() (int64, error) {
 		fileInfo, err := os.Stat(cc.FilePaths[i])
 		if err != nil {
 			return 0, peererrors.New(
-				peererrors.CodeInternalPeerError,
+				peererrors.ScopeLocalPeer,
+				peererrors.ErrBadRequest,
 				fmt.Sprintf(
 					"failed to get file info in capsule dto for size for this file: %s",
 					cc.FilePaths[i],

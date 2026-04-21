@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/engr-sjb/diogel/internal/customcrypto"
+	"github.com/engr-sjb/diogel/internal/peererrors"
+
 	"github.com/google/uuid"
 )
 
@@ -39,15 +41,17 @@ eg. var Msgs = [8]any{
 //
 // It contains the following message types:
 //   - CapsuleStream: Handles initial capsule streaming with various relevant information.
-//   - ReCapsuleStream: Manages recapsuling of a capsule.
+//   - ReCapsuleStream: Manages re-capsule of a capsule.
 //   - ContinueCapsuleStream: Controls continuation of interrupted capsule streams.
 //   - HeartbeatCheck: Manages heartbeat verification.
 var Msgs = []any{ // todo: do another research on gob registration of types. both pointer and value types are consider same. not sure yet
 	// notice: ... add note here
 	// &CapsuleStream{},
-	CapsuleStream{},
+	CapsuleIncomingStream{},
 	// &ReCapsuleStream{},
-	ReCapsuleStream{},
+	CapsuleIncomingShardStream{},
+	CapsuleIncomingManifestStream{},
+	CapsuleReStream{},
 	// &ContinueCapsuleStream{},
 	ContinueCapsuleStream{},
 	// &DeleteCapsule{},
@@ -57,37 +61,64 @@ var Msgs = []any{ // todo: do another research on gob registration of types. bot
 	RecoveryCeremony{},
 }
 
-type CapsuleStream struct {
-	ID uuid.UUID
-
+type CapsuleIncomingStream struct {
+	CapsuleID uuid.UUID
 	/*
 	* todo: add the guardians slice here. not sure if its public key
 	 */
-	// GuardiansPublicKey []ports.PublicKeyRaw
-	GuardiansPublicKey []customcrypto.PublicKeyBytes
-	GuardiansAddr      []string
+	GuardiansIDs  []uuid.UUID
+	GuardiansAddr []string
 
 	/*
 		_ todo: TotalSize will be unnecessary as we will be streaming straight from streamEnc(src,dst, encKey).
 		_ i think the best ideas i have are. - prepend every streamEnc with a enc size written as the first byte.
-		_ so we can peakBuf it to know the size the incoming enc stream.
+		_ so we can peakBuff it to know the size the incoming enc stream.
 	*/
 
-	TotalSize uint64
-
-	// todo:ChuckSize and TotalSize will help us implement [ContinueCapsuleStream] after interruption.
-	ChuckSize            uint32
+	ShardSize            uint16
+	KeyShareSize         uint8
 	HeartbeatGracePeriod time.Duration
+	CreatedAt            time.Time
+}
+
+type CapsuleIncomingShardStream struct {
+	ShardID                      uuid.UUID
+	CapsuleID                    uuid.UUID
+	RepairGroupID                uuid.UUID
+	Nonce                        []byte
+	DataShardNum, ParityShardNum uint8
+	Size                         uint32
+	IsFinal                      bool
+}
+
+type CapsuleIncomingManifestStream struct {
+	CapsuleID   uuid.UUID
+	TotalBlocks uint64
+	Blocks      []BlockManifest
+}
+
+type BlockManifest struct {
+	RepairGroupID  uuid.UUID
+	DataShardNum   uint8
+	ParityShardNum uint8
+}
+
+type CapsuleMasterKeyShare struct {
+	CapsuleID uuid.UUID
+	// Share           []byte
+	// ShareIndex      uint8
+	TotalShares     uint16
+	ThresholdShares uint8
 }
 
 type CapsuleStreamChuck struct {
 	IsFinal bool
 	ID      uuid.UUID
 	Seq     uint32
-	Size    uint64
+	Size    uint32
 }
 
-type ReCapsuleStream struct {
+type CapsuleReStream struct {
 	ID uuid.UUID
 	// GuardiansPublicKey []ports.PublicKeyRaw
 	GuardiansPublicKey []customcrypto.PublicKeyBytes

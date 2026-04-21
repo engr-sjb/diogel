@@ -57,7 +57,6 @@ var _ Archiver = (*archive)(nil)
 
 type archive struct {
 	shutdownWG *sync.WaitGroup
-	// parentDir  string
 }
 
 func NewArchive() *archive {

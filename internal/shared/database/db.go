@@ -5,6 +5,7 @@ const (
 
 	BucketCapsules             = "capsules"
 	BucketCapsulesActiveShards = "capsules:active_shards"
+	BucketCapsuleManifests     = "capsules:manifests"
 	BucketCapsulesRecovery     = "capsules:recovery"
 
 	BucketGuardians  = "guardians"
@@ -21,9 +22,12 @@ type Collection uint16
 
 const (
 	CollUser Collection = iota
+
 	CollCapsules
 	CollCapsulesActiveShards
+	CollCapsuleManifests
 	CollCapsulesRecovery
+
 	CollGuardians
 	CollKeyShares
 	CollHeartbeats
@@ -39,6 +43,8 @@ func (c Collection) BucketName() string {
 		return BucketCapsules
 	case CollCapsulesActiveShards:
 		return BucketCapsulesActiveShards
+	case CollCapsuleManifests:
+		return BucketCapsuleManifests
 	case CollCapsulesRecovery:
 		return BucketCapsulesRecovery
 

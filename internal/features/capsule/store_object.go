@@ -33,7 +33,7 @@ var (
 	ErrFileStoreKind = errors.New("file store kind not supported")
 )
 
-type fileStorer interface {
+type objectStorer interface {
 	ports.FileStorer
 
 	// Open takes st (storageType eg. google cloud, local disk, etc. which are
@@ -47,7 +47,7 @@ type fileStorer interface {
 	VerifyCAS(hash [32]byte) (bool, error)
 }
 
-var _ fileStorer = (*fileStore)(nil) // To catch methods mismatches.
+var _ objectStorer = (*objectStore)(nil) // To catch methods mismatches.
 
 type FileStoreConfig struct {
 	// NOTICE IMPORTANT: When you add a field, ALWAYS check if it is it's default value in its contractor func.
@@ -58,24 +58,24 @@ type FileStoreConfig struct {
 	RootDir string
 }
 
-type fileStore struct {
+type objectStore struct {
 	*FileStoreConfig
 	// todo: if its system disk, we don't need to inject nothing, but if its some external cloud or such storage, then we will allow to inject that here.
 }
 
-func NewObjectStore(cfg *FileStoreConfig) *fileStore {
+func NewObjectStore(cfg *FileStoreConfig) *objectStore {
 	// NOTICE IMPORTANT: check if all fields on cfg are not their default value before use.
 
-	return &fileStore{
+	return &objectStore{
 		FileStoreConfig: cfg,
 	}
 }
 
-func (s *fileStore) Save() {
+func (s *objectStore) Save() {
 
 }
 
-func (s *fileStore) Open(kind ObjectStoreKind, paths []string, filesHolder []ports.File) error {
+func (s *objectStore) Open(kind ObjectStoreKind, paths []string, filesHolder []ports.File) error {
 	// openedFiles := make([]ports.File, 0, len(paths))
 
 	switch kind {
@@ -99,7 +99,7 @@ func (s *fileStore) Open(kind ObjectStoreKind, paths []string, filesHolder []por
 }
 
 // SaveCAS stores data in content-addressable manner using hash as key
-func (s *fileStore) SaveCAS(hash [32]byte, data []byte) error {
+func (s *objectStore) SaveCAS(hash [32]byte, data []byte) error {
 	// Todo: do proper validation for hash
 	if len(hash) < 2 {
 		return errors.New("hash too short for CAS storage")
@@ -117,7 +117,7 @@ func (s *fileStore) SaveCAS(hash [32]byte, data []byte) error {
 }
 
 // GetCAS retrieves data by its content hash
-func (s *fileStore) GetCAS(hash [32]byte) ([]byte, error) {
+func (s *objectStore) GetCAS(hash [32]byte) ([]byte, error) {
 	if len(hash) < 2 {
 		return nil, errors.New("hash too short for CAS storage")
 	}
@@ -134,7 +134,7 @@ func (s *fileStore) GetCAS(hash [32]byte) ([]byte, error) {
 }
 
 // ExistsCAS checks if content exists in CAS
-func (s *fileStore) ExistsCAS(hash [32]byte) (bool, error) {
+func (s *objectStore) ExistsCAS(hash [32]byte) (bool, error) {
 	if len(hash) < 2 {
 		return false, errors.New("hash too short for CAS storage")
 	}
@@ -157,7 +157,7 @@ func (s *fileStore) ExistsCAS(hash [32]byte) (bool, error) {
 }
 
 // VerifyCAS retrieves data and verifies its integrity
-func (s *fileStore) VerifyCAS(hash [32]byte) (bool, error) {
+func (s *objectStore) VerifyCAS(hash [32]byte) (bool, error) {
 	// Get data
 	data, err := s.GetCAS(hash)
 	if err != nil {
@@ -199,12 +199,12 @@ func CASPathTransformFunc(hash [32]byte) pathKey {
 	}
 }
 
-func (s *fileStore) Create(pathName string) (ports.File, error) {
+func (s *objectStore) Create(pathName string) (ports.File, error) {
 	fullPath := filepath.Join(s.RootDir, pathName)
 	return os.Create(fullPath)
 }
 
-func (s *fileStore) MkdirAll(dirPath string) error {
+func (s *objectStore) MkdirAll(dirPath string) error {
 	fullPath := filepath.Join(s.RootDir, dirPath)
 	return os.MkdirAll(fullPath, 0700)
 }

@@ -34,9 +34,23 @@ func TestErasure(t *testing.T) {
 		{
 			name:               "reconstruct with two missing shards",
 			data:               []byte("testing erasure coding from 2 missing shard"),
-			dataShards:         4,
+			dataShards:         3,
 			parityShards:       2,
 			corruptShardsCount: 2,
+		},
+		{
+			name:               "reconstruct with 3 missing shards",
+			data:               []byte("testing erasure coding from 2 missing shard"),
+			dataShards:         3,
+			parityShards:       2,
+			corruptShardsCount: 3,
+		},
+		{
+			name:               "reconstruct with 4 missing shards",
+			data:               []byte("testing erasure coding from 2 missing shard"),
+			dataShards:         3,
+			parityShards:       2,
+			corruptShardsCount: 4,
 		},
 		{
 			name:               "reconstruct with max missing shards",

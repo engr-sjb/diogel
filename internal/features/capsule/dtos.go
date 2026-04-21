@@ -213,4 +213,18 @@ func (cc *CreateCapsuleDTO) GetTotalSize() (int64, error) {
 	return totalSize, nil
 }
 
+func calculateDefaultThreshold(numGuardians int) int {
+	switch {
+	case numGuardians <= 3:
+		return 2 // 67% for small groups
+	case numGuardians <= 5:
+		return (numGuardians+1)/2 + 1 // ~60-67%
+	case numGuardians <= 7:
+		return (2*numGuardians + 2) / 3 // ~67%
+	default:
+		// For larger groups, allow more fault tolerance
+		return (3*numGuardians + 2) / 5 // ~60%
+	}
+}
+
 // outgoing
